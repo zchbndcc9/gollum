@@ -113,6 +113,7 @@ defmodule Gollum.Host do
   def allowed?(%{allowed: allowed, disallowed: disallowed}, path) do
     allowed = Enum.filter(allowed, &match_path?(path, &1))
     disallowed = Enum.filter(disallowed, &match_path?(path, &1))
+    IO.inspect disallowed, label: "Disallowed"
 
     # Check for empty array before finding max
     cond do
@@ -146,11 +147,12 @@ defmodule Gollum.Host do
   # Assumes valid input.
   def match_path?(lhs, rhs) do
     rhs = String.split(rhs, "*")
-    do_match_path(lhs, rhs)
+    res = do_match_path(lhs, rhs)
+    res
   end
 
   # Does the actual path matching
-  defp do_match_path(_, []), do: true
+  defp do_match_path(_, []), do: false #changing from true to false so it doesn't trigger on the empty list just because
   defp do_match_path("", _), do: false
   defp do_match_path(lhs, [group | rest]) do
     case do_match_group(lhs, group) do
