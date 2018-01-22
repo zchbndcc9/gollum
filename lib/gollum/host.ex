@@ -113,7 +113,6 @@ defmodule Gollum.Host do
   def allowed?(%{allowed: allowed, disallowed: disallowed}, path) do
     allowed = Enum.filter(allowed, &match_path?(path, &1))
     disallowed = Enum.filter(disallowed, &match_path?(path, &1))
-    IO.inspect disallowed, label: "Disallowed"
 
     # Check for empty array before finding max
     cond do
@@ -147,12 +146,11 @@ defmodule Gollum.Host do
   # Assumes valid input.
   def match_path?(lhs, rhs) do
     rhs = String.split(rhs, "*")
-    res = do_match_path(lhs, rhs)
-    res
+    do_match_path(lhs, rhs)
   end
 
   # Does the actual path matching
-  defp do_match_path(_, []), do: false #changing from true to false so it doesn't trigger on the empty list just because
+  defp do_match_path(_, []), do: true
   defp do_match_path("", _), do: false
   defp do_match_path(lhs, [group | rest]) do
     case do_match_group(lhs, group) do
@@ -179,6 +177,12 @@ defmodule Gollum.Host do
     {:ok, lhs}
   defp do_match_group(<<ch::utf8, lhs::binary>>, <<ch::utf8, rhs::binary>>), do:
     do_match_group(lhs, rhs)
+  defp do_match_group(<<_ch::utf8, lhs::binary>>, <<ch::utf8, rhs::binary>>) do
+    case ch do
+      47 -> :error
+      _ -> do_match_group(lhs, <<ch::utf8, rhs::binary>>)
+    end
+  end
   defp do_match_group(<<_ch::utf8, lhs::binary>>, rhs), do:
     do_match_group(lhs, rhs)
 end
