@@ -32,5 +32,6 @@ defmodule Gollum.HostTest do
     refute Host.match_path?("/Fish.asp", "/fish")
     refute Host.match_path?("/catfish", "/fish*")
     refute Host.match_path?("/wiki/Main_Page", "/w/")
+    refute Host.match_path?("/nhl/zephyr/team_los-angeles-kings", "/login")
   end
 end

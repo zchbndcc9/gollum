@@ -113,7 +113,6 @@ defmodule Gollum.Host do
   def allowed?(%{allowed: allowed, disallowed: disallowed}, path) do
     allowed = Enum.filter(allowed, &match_path?(path, &1))
     disallowed = Enum.filter(disallowed, &match_path?(path, &1))
-
     # Check for empty array before finding max
     cond do
       length(disallowed) == 0 -> :allowed
@@ -145,44 +144,7 @@ defmodule Gollum.Host do
   # path on the right can contain wildcards and other special characters.
   # Assumes valid input.
   def match_path?(lhs, rhs) do
-    rhs = String.split(rhs, "*")
-    do_match_path(lhs, rhs)
+    rule_regex = String.replace(rhs, "*", ".*") |> String.replace("/","\\/") |> String.replace("?","\\?")
+    String.match?(lhs, ~r/#{rule_regex}/)
   end
-
-  # Does the actual path matching
-  defp do_match_path(_, []), do: true
-  defp do_match_path("", _), do: false
-  defp do_match_path(lhs, [group | rest]) do
-    case do_match_group(lhs, group) do
-      {:ok, remaining} -> do_match_path(remaining, rest)
-      :error -> false
-    end
-  end
-
-  # Matches the left hand side chars to the right hand side chars
-  # Recognises the "$" sign. Assumes valid input.
-  # e.g. {:ok, "llo"} = do_match_group("hello", "he")
-  # e.g. {:ok, "llo"} = do_match_group("yohello", "helloo")
-  # e.g. :error = do_match_group("hello", "helloo")
-  # e.g. :error = do_match_group("hello", "he$")
-  defp do_match_group("", ""), do:
-    {:ok, ""}
-  defp do_match_group("", "$" <> _rhs), do:
-    {:ok, ""}
-  defp do_match_group(_lhs, "$" <> _rhs), do:
-    :error
-  defp do_match_group("", _rhs), do:
-    :error
-  defp do_match_group(lhs, ""), do:
-    {:ok, lhs}
-  defp do_match_group(<<ch::utf8, lhs::binary>>, <<ch::utf8, rhs::binary>>), do:
-    do_match_group(lhs, rhs)
-  defp do_match_group(<<_ch::utf8, lhs::binary>>, <<ch::utf8, rhs::binary>>) do
-    case ch do
-      47 -> :error
-      _ -> do_match_group(lhs, <<ch::utf8, rhs::binary>>)
-    end
-  end
-  defp do_match_group(<<_ch::utf8, lhs::binary>>, rhs), do:
-    do_match_group(lhs, rhs)
 end
