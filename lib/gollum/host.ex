@@ -143,6 +143,10 @@ defmodule Gollum.Host do
   # Returns whether the path on the left matches the path on the right. The
   # path on the right can contain wildcards and other special characters.
   # Assumes valid input.
+  def match_path?(lhs, "/" <> _ = rhs) do
+    rule_regex = String.replace(rhs, "*", ".*") |> String.replace("/","\\/") |> String.replace("?","\\?")
+    String.match?(lhs, ~r/^#{rule_regex}/)
+  end
   def match_path?(lhs, rhs) do
     rule_regex = String.replace(rhs, "*", ".*") |> String.replace("/","\\/") |> String.replace("?","\\?")
     String.match?(lhs, ~r/#{rule_regex}/)
