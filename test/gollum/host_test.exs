@@ -26,7 +26,7 @@ defmodule Gollum.HostTest do
     assert Host.match_path?("/folder/filename.php", "/*.php$")
     assert Host.match_path?("/fishheads/catfish.php?parameters", "/fish*.php")
     assert Host.match_path?("/allconnect/test", "/allconnect")
-    assert Host.match_path?("/collections/frontpage", "/collections/*+*")
+    assert Host.match_path?("/collections/frontpage+backpage", "/collections/*+*")
     refute Host.match_path?("/fish", "/fish/")
     refute Host.match_path?("/", "/*.php")
     refute Host.match_path?("/filename.php?params", "/*.php$")
@@ -36,6 +36,6 @@ defmodule Gollum.HostTest do
     refute Host.match_path?("/wiki/Main_Page", "/w/")
     refute Host.match_path?("/nhl/zephyr/team_los-angeles-kings", "/login")
     refute Host.match_path?("/no/allconnect/test", "/allconnect")
-    assert Host.match_path?("/collections/frontpage+backpage", "/collections/*+*")
+    refute Host.match_path?("/collections/frontpage", "/collections/*+*")
   end
 end
